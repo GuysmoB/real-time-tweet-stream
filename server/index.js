@@ -17,10 +17,9 @@ app.get('/', (req, res) => {
 })
 
 const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules'
-const streamURL =
-  'https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics&expansions=author_id'
+const streamURL = 'https://api.twitter.com/2/tweets/search/stream?tweet.fields=text&expansions=author_id'
 
-const rules = [{ value: 'giveaway' }]
+const rules = [{ value: 'jim carrey' }]
 
 // Get stream rules
 async function getRules() {
@@ -29,7 +28,7 @@ async function getRules() {
       Authorization: `Bearer ${TOKEN}`,
     },
   })
-  console.log(response.body)
+  console.log('rules', response.body)
   return response.body
 }
 
@@ -83,9 +82,13 @@ function streamTweets(socket) {
   stream.on('data', (data) => {
     try {
       const json = JSON.parse(data)
+      /* if ((json.data.text).includes("Jim")) {
+        console.log(json)
+        socket.emit('tweet', json)
+      } */
       console.log(json)
       socket.emit('tweet', json)
-    } catch (error) {}
+    } catch (error) { }
   })
 
   return stream
@@ -97,14 +100,9 @@ io.on('connection', async () => {
   let currentRules
 
   try {
-    //   Get all stream rules
     currentRules = await getRules()
-
-    // Delete all stream rules
-    await deleteRules(currentRules)
-
-    // Set rules based on array above
-    await setRules()
+    /* await deleteRules(currentRules)
+    await setRules() */
   } catch (error) {
     console.error(error)
     process.exit(1)
