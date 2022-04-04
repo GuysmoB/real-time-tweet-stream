@@ -18,8 +18,7 @@ app.get('/', (req, res) => {
 
 const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules'
 const streamURL = 'https://api.twitter.com/2/tweets/search/stream?tweet.fields=text&expansions=author_id'
-
-const rules = [{ value: 'jim carrey' }]
+const rules = [{ value: '(\"is being listed\" OR \"will be listed\" OR \"is going to be listed\") -is:retweet -is:reply lang:en' }]
 
 // Get stream rules
 async function getRules() {
@@ -96,21 +95,19 @@ function streamTweets(socket) {
 
 io.on('connection', async () => {
   console.log('Client connected...')
-
   let currentRules
 
   try {
     currentRules = await getRules()
-    /* await deleteRules(currentRules)
-    await setRules() */
+    await deleteRules(currentRules)
+    await setRules()
   } catch (error) {
     console.error(error)
     process.exit(1)
   }
 
-  const filteredStream = streamTweets(io)
-
   let timeout = 0
+  const filteredStream = streamTweets(io)
   filteredStream.on('timeout', () => {
     // Reconnect on error
     console.warn('A connection error occurred. Reconnecting…')
